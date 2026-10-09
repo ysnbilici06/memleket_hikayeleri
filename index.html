@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Memleket Hikayeleri</title>
+  <meta name="description" content="Memleketinin sokaklarını, lezzetlerini, sözlerini ve anılarını Türkiye haritasında paylaş, keşfet.">
+  <meta name="theme-color" content="#a8492a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/simge/simge-192.png">
+  <link rel="apple-touch-icon" href="assets/simge/simge-180.png">
+  <meta name="apple-mobile-web-app-title" content="Memleket">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="css/stil.css">
+  <script>
+    // Tema, sayfa çizilmeden önce uygulanır ki açılışta renk sıçraması olmasın.
+    try { var t = JSON.parse(localStorage.getItem('mh-tema')); if (t) document.documentElement.dataset.tema = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="ust">
+    <a class="logo" href="#/" aria-label="Memleket Hikayeleri – ana sayfa">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+        <path d="M16 30s10-9.2 10-17A10 10 0 0 0 6 13c0 7.8 10 17 10 17z" fill="currentColor"/>
+        <path d="M10.5 13.5 16 8.5l5.5 5v5h-11z" fill="var(--kart)"/>
+        <path d="M14.5 18.5v-3h3v3z" fill="currentColor"/>
+      </svg>
+      <span>Memleket Hikayeleri</span>
+    </a>
+    <button class="simge-dugme" type="button" data-is="yukle" id="yukle" aria-label="Uygulamayı yükle" title="Uygulamayı yükle" hidden>⤓</button>
+    <button class="simge-dugme" type="button" data-is="tema" aria-label="Açık / koyu tema" title="Açık / koyu tema">◐</button>
+  </header>
+
+  <nav class="menu" aria-label="Ana menü">
+    <a href="#/" data-sayfa="harita"><span aria-hidden="true">🗺️</span>Harita</a>
+    <a href="#/kesfet" data-sayfa="kesfet"><span aria-hidden="true">🔎</span>Keşfet</a>
+    <a href="#/paylas" data-sayfa="paylas" class="menu-paylas"><span aria-hidden="true">✍️</span>Paylaş</a>
+    <a href="#/meydan" data-sayfa="meydan"><span aria-hidden="true">🏆</span>Meydan</a>
+    <a href="#/sozluk" data-sayfa="sozluk"><span aria-hidden="true">📖</span>Sözlük</a>
+    <a href="#/ben" data-sayfa="ben"><span aria-hidden="true">📔</span><i>Benim</i>Hikayem</a>
+  </nav>
+
+  <main id="icerik" tabindex="-1"></main>
+
+  <div id="bildirim" class="bildirim" role="status" aria-live="polite" hidden></div>
+
+  <script src="data/iller.js"></script>
+  <script src="data/ornekler.js"></script>
+  <script src="js/depo.js"></script>
+  <script src="js/denetim.js"></script>
+  <script src="js/uygulama.js"></script>
+</body>
+</html>
