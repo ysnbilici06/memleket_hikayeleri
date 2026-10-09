@@ -147,7 +147,7 @@
     document.documentElement.dataset.renk = etkin;
     if (Depo.ayar('renkEtkin') !== etkin) Depo.ayarYaz('renkEtkin', etkin);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--vurgu').trim();
+    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--v-a').trim();
   }
 
   function bildir(metin) {
@@ -602,7 +602,7 @@
       (Depo.ornekVarMi() ? '<button type="button" class="dugme" data-is="ornek-kaldir">Örnek içeriği kaldır</button>' : '') +
       '<button type="button" class="dugme" data-is="tema">' + S('tema') + ' Açık / koyu tema</button></div>' +
       '<h3 class="ayar-baslik">Renkler</h3><div class="renkler" role="group" aria-label="Renk teması">' +
-      [{ k: 'ana', ad: 'Memleket Mavisi', bolge: 'Ana tema' }, { k: 'oto', ad: 'Memleketime göre' }].concat(RENKLER).map(function (r) {
+      [{ k: 'ana', ad: 'Memleket', bolge: 'Ana tema' }, { k: 'oto', ad: 'Memleketime göre' }].concat(RENKLER).map(function (r) {
         const secili = (Depo.ayar('renk') || 'ana') === r.k;
         return '<button type="button" class="renk-sec' + (secili ? ' secili' : '') + '" data-is="renk" data-deger="' + r.k + '" data-renk="' +
           (r.k === 'oto' ? memleketRengi() : r.k) + '" aria-pressed="' + secili + '"><i></i><span>' + k(r.ad) +

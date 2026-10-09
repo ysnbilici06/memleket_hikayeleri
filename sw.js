@@ -1,10 +1,11 @@
 /* Memleket Hikayeleri – çevrimdışı çalışma.
    Uygulama dosyaları önbellekten hemen verilir, arka planda yenisi indirilir;
    değişiklikler bir sonraki açılışta görünür. Dosya listesi değişirse KABUK adındaki sayı artırılır. */
-var KABUK = 'mh-kabuk-3';
+var KABUK = 'mh-kabuk-4';
 var DOSYALAR = [
   './', 'index.html', 'manifest.webmanifest', 'css/stil.css',
   'js/depo.js', 'js/denetim.js', 'js/simgeler.js', 'js/uygulama.js', 'data/iller.js', 'data/ornekler.js',
+  'assets/yazi/nunito-400-800-latin-ext.woff2', 'assets/yazi/nunito-400-800-latin.woff2', 'assets/yazi/poppins-600-latin-ext.woff2', 'assets/yazi/poppins-600-latin.woff2', 'assets/yazi/poppins-700-latin-ext.woff2', 'assets/yazi/poppins-700-latin.woff2', 
   'assets/simge/simge-192.png', 'assets/simge/simge-512.png'
 ];
 
