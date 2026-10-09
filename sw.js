@@ -1,10 +1,10 @@
 /* Memleket Hikayeleri – çevrimdışı çalışma.
    Uygulama dosyaları önbellekten hemen verilir, arka planda yenisi indirilir;
    değişiklikler bir sonraki açılışta görünür. Dosya listesi değişirse KABUK adındaki sayı artırılır. */
-var KABUK = 'mh-kabuk-1';
+var KABUK = 'mh-kabuk-2';
 var DOSYALAR = [
   './', 'index.html', 'manifest.webmanifest', 'css/stil.css',
-  'js/depo.js', 'js/denetim.js', 'js/uygulama.js', 'data/iller.js', 'data/ornekler.js',
+  'js/depo.js', 'js/denetim.js', 'js/simgeler.js', 'js/uygulama.js', 'data/iller.js', 'data/ornekler.js',
   'assets/simge/simge-192.png', 'assets/simge/simge-512.png'
 ];
 

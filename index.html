@@ -13,8 +13,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="css/stil.css">
   <script>
-    // Tema, sayfa çizilmeden önce uygulanır ki açılışta renk sıçraması olmasın.
-    try { var t = JSON.parse(localStorage.getItem('mh-tema')); if (t) document.documentElement.dataset.tema = t; } catch (e) {}
+    // Tema ve renkler, sayfa çizilmeden önce uygulanır ki açılışta renk sıçraması olmasın.
+    try {
+      var t = JSON.parse(localStorage.getItem('mh-tema')); if (t) document.documentElement.dataset.tema = t;
+      var r = JSON.parse(localStorage.getItem('mh-renkEtkin')); if (r) document.documentElement.dataset.renk = r;
+    } catch (e) {}
   </script>
 </head>
 <body>
@@ -27,17 +30,17 @@
       </svg>
       <span>Memleket Hikayeleri</span>
     </a>
-    <button class="simge-dugme" type="button" data-is="yukle" id="yukle" aria-label="Uygulamayı yükle" title="Uygulamayı yükle" hidden>⤓</button>
-    <button class="simge-dugme" type="button" data-is="tema" aria-label="Açık / koyu tema" title="Açık / koyu tema">◐</button>
+    <button class="simge-dugme" type="button" data-is="yukle" id="yukle" aria-label="Uygulamayı yükle" title="Uygulamayı yükle" data-simge="indir" hidden></button>
+    <button class="simge-dugme" type="button" data-is="tema" aria-label="Açık / koyu tema" title="Açık / koyu tema" data-simge="tema"></button>
   </header>
 
   <nav class="menu" aria-label="Ana menü">
-    <a href="#/" data-sayfa="harita"><span aria-hidden="true">🗺️</span>Harita</a>
-    <a href="#/kesfet" data-sayfa="kesfet"><span aria-hidden="true">🔎</span>Keşfet</a>
-    <a href="#/paylas" data-sayfa="paylas" class="menu-paylas"><span aria-hidden="true">✍️</span>Paylaş</a>
-    <a href="#/meydan" data-sayfa="meydan"><span aria-hidden="true">🏆</span>Meydan</a>
-    <a href="#/sozluk" data-sayfa="sozluk"><span aria-hidden="true">📖</span>Sözlük</a>
-    <a href="#/ben" data-sayfa="ben"><span aria-hidden="true">📔</span><i>Benim</i>Hikayem</a>
+    <a href="#/" data-sayfa="harita"><span data-simge="harita"></span>Harita</a>
+    <a href="#/kesfet" data-sayfa="kesfet"><span data-simge="ara"></span>Keşfet</a>
+    <a href="#/paylas" data-sayfa="paylas" class="menu-paylas"><span data-simge="kalem"></span>Paylaş</a>
+    <a href="#/meydan" data-sayfa="meydan"><span data-simge="kupa"></span>Meydan</a>
+    <a href="#/sozluk" data-sayfa="sozluk"><span data-simge="kitap"></span>Sözlük</a>
+    <a href="#/ben" data-sayfa="ben"><span data-simge="defter"></span><i>Benim</i>Hikayem</a>
   </nav>
 
   <main id="icerik" tabindex="-1"></main>
@@ -48,6 +51,7 @@
   <script src="data/ornekler.js"></script>
   <script src="js/depo.js"></script>
   <script src="js/denetim.js"></script>
+  <script src="js/simgeler.js"></script>
   <script src="js/uygulama.js"></script>
 </body>
 </html>

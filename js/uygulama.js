@@ -7,6 +7,7 @@
   const HARITA = window.HARITA;
   const Depo = window.Depo;
   const Denetim = window.Denetim;
+  const S = window.Simge;
   const IL = {};
   ILLER.forEach(function (i) { IL[i.p] = i; });
   const ILLER_ADA_GORE = ILLER.slice().sort(function (a, b) { return a.ad.localeCompare(b.ad, 'tr'); });
@@ -17,12 +18,12 @@
     { k: '2000', ad: '2000’ler' }, { k: '2010', ad: '2010’lar' }, { k: 'bugun', ad: 'Bugün' }
   ];
   const ETIKETLER = [
-    { ad: 'ÇocukluğumunSokakları', simge: '🏘️' }, { ad: 'YöreselLezzetler', simge: '🍲' },
-    { ad: 'UnutulmayanGelenekler', simge: '🎎' }, { ad: 'BayramSabahları', simge: '🍬' },
-    { ad: 'DüğünDernek', simge: '🥁' }, { ad: 'EskiFotoğraflar', simge: '📷' },
-    { ad: 'GurbetHasreti', simge: '🚂' }, { ad: 'ÇarşıPazar', simge: '🧺' },
-    { ad: 'YaylaYolu', simge: '⛰️' }, { ad: 'SokakOyunları', simge: '🪁' },
-    { ad: 'TürküMasal', simge: '🎶' }, { ad: 'UstalarZanaatlar', simge: '🔨' }
+    { ad: 'ÇocukluğumunSokakları', simge: 'sokak' }, { ad: 'YöreselLezzetler', simge: 'tencere' },
+    { ad: 'UnutulmayanGelenekler', simge: 'bardak' }, { ad: 'BayramSabahları', simge: 'seker' },
+    { ad: 'DüğünDernek', simge: 'davul' }, { ad: 'EskiFotoğraflar', simge: 'fotograf' },
+    { ad: 'GurbetHasreti', simge: 'tren' }, { ad: 'ÇarşıPazar', simge: 'sepet' },
+    { ad: 'YaylaYolu', simge: 'dag' }, { ad: 'SokakOyunları', simge: 'ucurtma' },
+    { ad: 'TürküMasal', simge: 'nota' }, { ad: 'UstalarZanaatlar', simge: 'cekic' }
   ];
   // Haftalık Memleket Meydanı temaları; her hafta sıradaki gelir. data/ornekler.js'teki "tema" bu sırayı gösterir.
   const TEMALAR = [
@@ -42,6 +43,14 @@
     28: 'Uşak', 52: 'Uşak', 8: 'Uşak', 6: 'Seğmen', 18: 'Yâran', 58: 'Yiğido', 22: 'Pehlivan' };
   const UNVAN_ESIGI = 50;
 
+  // Renk temaları bölgelere göre adlandırılır; "oto" seçiliyken kullanıcının memleketinin bölgesi uygulanır.
+  const RENKLER = [
+    { k: 'toprak', ad: 'Toprak', bolge: 'İç Anadolu' }, { k: 'karadeniz', ad: 'Yayla Yeşili', bolge: 'Karadeniz' },
+    { k: 'ege', ad: 'Ege Mavisi', bolge: 'Ege' }, { k: 'akdeniz', ad: 'Akdeniz Güneşi', bolge: 'Akdeniz' },
+    { k: 'marmara', ad: 'Erguvan', bolge: 'Marmara' }, { k: 'dogu', ad: 'Kar ve Dağ', bolge: 'Doğu Anadolu' },
+    { k: 'guneydogu', ad: 'Nar', bolge: 'Güneydoğu Anadolu' }
+  ];
+
   const harita = { donem: '', sira: 'begeni' };
   const suzgec = { ara: '', etiket: '', il: '', donem: '', sira: 'yeni' };
   const sozlukDurum = { tur: 'kelime', il: '', ara: '' };
@@ -49,6 +58,7 @@
   let yeniSes = null;
   let kaydedici = null;
   let yuklemeIstegi = null;
+  let benYeni = 0;
 
   /* ---------- yardımcılar ---------- */
 
@@ -71,7 +81,7 @@
   }
   function etiketSimgesi(ad) {
     const e = ETIKETLER.find(function (x) { return x.ad === ad; });
-    return e ? e.simge : '🏡';
+    return S(e ? e.simge : 'ev');
   }
   function sirala(liste, sira) {
     return liste.slice().sort(function (a, b) {
@@ -126,6 +136,20 @@
     };
   }
 
+  function memleketRengi() {
+    const il = IL[Depo.profil.memleket];
+    const r = il && RENKLER.find(function (x) { return x.bolge === il.b; });
+    return r ? r.k : 'toprak';
+  }
+  function renkUygula() {
+    const secim = Depo.ayar('renk') || 'oto';
+    const etkin = secim === 'oto' ? memleketRengi() : secim;
+    document.documentElement.dataset.renk = etkin;
+    if (Depo.ayar('renkEtkin') !== etkin) Depo.ayarYaz('renkEtkin', etkin);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--vurgu').trim();
+  }
+
   function bildir(metin) {
     const kutu = document.getElementById('bildirim');
     kutu.textContent = metin;
@@ -154,15 +178,15 @@
     hs.forEach(function (h) { (h.etiketler || []).forEach(function (e) { etiketler[e] = (etiketler[e] || 0) + 1; }); });
     const unvan = UNVANLAR[Depo.profil.memleket] || 'Hemşehri';
     return [
-      { simge: '🌱', ad: 'İlk Adım', aciklama: 'İlk hikayeni paylaş', var: hs.length >= 1 },
-      { simge: '📔', ad: 'Anı Defteri', aciklama: '5 hikaye paylaş', var: hs.length >= 5 },
-      { simge: '🕊️', ad: 'Kültür Elçisi', aciklama: '3 farklı etikette hikaye paylaş', var: Object.keys(etiketler).length >= 3 },
-      { simge: '🏛️', ad: 'Yöre Muhtarı', aciklama: 'Aynı ilçeden 3 hikaye paylaş', var: Object.keys(ilceSayisi).some(function (a) { return ilceSayisi[a] >= 3; }) },
-      { simge: '🗣️', ad: 'Söz Ustası', aciklama: 'Sözlüğe 3 katkı yap', var: kt.sozluk.length >= 3 },
-      { simge: '🍲', ad: 'Lezzet Avcısı', aciklama: '#YöreselLezzetler ile 2 hikaye paylaş', var: (etiketler['YöreselLezzetler'] || 0) >= 2 },
-      { simge: '⏳', ad: 'Zaman Yolcusu', aciklama: '2000 öncesinden bir anı paylaş', var: hs.some(function (h) { return ['eski', '1980', '1990'].indexOf(h.donem) >= 0; }) },
-      { simge: '🏆', ad: 'Meydan Yiğidi', aciklama: 'Haftalık Meydan’a katıl', var: hs.some(function (h) { return h.tema; }) },
-      { simge: '🎖️', ad: unvan, aciklama: UNVAN_ESIGI + ' kültür puanına ulaş – memleketinin unvanı', var: puan >= UNVAN_ESIGI }
+      { simge: 'filiz', ad: 'İlk Adım', aciklama: 'İlk hikayeni paylaş', var: hs.length >= 1 },
+      { simge: 'defter', ad: 'Anı Defteri', aciklama: '5 hikaye paylaş', var: hs.length >= 5 },
+      { simge: 'kus', ad: 'Kültür Elçisi', aciklama: '3 farklı etikette hikaye paylaş', var: Object.keys(etiketler).length >= 3 },
+      { simge: 'bina', ad: 'Yöre Muhtarı', aciklama: 'Aynı ilçeden 3 hikaye paylaş', var: Object.keys(ilceSayisi).some(function (a) { return ilceSayisi[a] >= 3; }) },
+      { simge: 'soz', ad: 'Söz Ustası', aciklama: 'Sözlüğe 3 katkı yap', var: kt.sozluk.length >= 3 },
+      { simge: 'tencere', ad: 'Lezzet Avcısı', aciklama: '#YöreselLezzetler ile 2 hikaye paylaş', var: (etiketler['YöreselLezzetler'] || 0) >= 2 },
+      { simge: 'kum', ad: 'Zaman Yolcusu', aciklama: '2000 öncesinden bir anı paylaş', var: hs.some(function (h) { return ['eski', '1980', '1990'].indexOf(h.donem) >= 0; }) },
+      { simge: 'kupa', ad: 'Meydan Yiğidi', aciklama: 'Haftalık Meydan’a katıl', var: hs.some(function (h) { return h.tema; }) },
+      { simge: 'madalya', ad: unvan, aciklama: UNVAN_ESIGI + ' kültür puanına ulaş – memleketinin unvanı', var: puan >= UNVAN_ESIGI }
     ];
   }
   function kazanilanlar() {
@@ -172,7 +196,7 @@
   // Bir katkıdan sonra yeni kazanılan rozetleri duyurur.
   function katkiBildir(mesaj, oncekiRozetler) {
     const yeni = kazanilanlar().filter(function (r) { return oncekiRozetler.indexOf(r) < 0; });
-    bildir(yeni.length ? mesaj + ' Yeni rozet: ' + yeni.join(', ') + ' 🎉' : mesaj);
+    bildir(yeni.length ? mesaj + ' Yeni rozet: ' + yeni.join(', ') : mesaj);
   }
 
   /* ---------- ortak parçalar ---------- */
@@ -180,7 +204,7 @@
   function kapak(h, sinif) {
     if (h.foto) return '<img class="' + sinif + '" src="' + k(h.foto) + '" alt="" loading="lazy">';
     const ton = (h.il * 47) % 360;
-    return '<span class="' + sinif + ' bos-kapak" style="--ton:' + ton + '"><span>' + etiketSimgesi((h.etiketler || [])[0]) + '</span></span>';
+    return '<span class="' + sinif + ' bos-kapak" style="--kapak:' + ton + '"><span>' + etiketSimgesi((h.etiketler || [])[0]) + '</span></span>';
   }
   function ornekIsareti(kayit) {
     return kayit.ornek ? ' <span class="ornek-isareti" title="Uygulamayı tanıtmak için eklenmiş kurgu içerik">Örnek</span>' : '';
@@ -189,9 +213,9 @@
     const yorum = Depo.yorumlar(h.id).length;
     const ozet = h.metin.length > 150 ? h.metin.slice(0, 150).replace(/\s+\S*$/, '') + '…' : h.metin;
     return '<a class="kart" href="#/hikaye/' + encodeURIComponent(h.id) + '">' + kapak(h, 'kart-kapak') +
-      '<span class="kart-ic"><span class="kunye">📍 ' + k(yer(h)) + ' · ' + k(donemAdi(h.donem)) + '</span>' +
+      '<span class="kart-ic"><span class="kunye">' + S('konum') + ' ' + k(yer(h)) + ' · ' + k(donemAdi(h.donem)) + '</span>' +
       '<strong>' + k(h.baslik) + '</strong><span class="ozet">' + k(ozet) + '</span>' +
-      '<span class="kart-alt"><span>♥ ' + (h.begeni || 0) + '</span><span>💬 ' + yorum + '</span><span class="saga">' + k(h.yazar.ad) + ornekIsareti(h) + '</span></span></span></a>';
+      '<span class="kart-alt"><span>' + S('kalp') + ' ' + (h.begeni || 0) + '</span><span>' + S('yorum') + ' ' + yorum + '</span><span class="saga">' + k(h.yazar.ad) + ornekIsareti(h) + '</span></span></span></a>';
   }
   function kartlar(liste, bosMesaj) {
     if (!liste.length) return '<p class="bos">' + bosMesaj + '</p>';
@@ -246,8 +270,8 @@
       return '<path d="' + i.d + '" class="il isi' + isi + (il && il.p === i.p ? ' secili' : '') + '" data-is="il" data-p="' + i.p +
         '" tabindex="0" role="button" aria-label="' + k(i.ad) + '"><title>' + k(i.ad) + (adet[i.p] ? ' · ' + adet[i.p] + ' hikaye' : '') + '</title></path>';
     }).join('');
-    const tac = lider ? '<text class="tac" x="' + IL[lider.il].m[0] + '" y="' + (IL[lider.il].m[1] - 6) + '">👑</text>' : '';
-    const ilAdi = il ? '<text class="il-adi" x="' + il.m[0] + '" y="' + (il.m[1] + 4) + '">' + k(il.ad) + '</text>' : '';
+    let tac = lider ? '<g class="tac" transform="translate(' + IL[lider.il].m[0] + ' ' + (IL[lider.il].m[1] - 14) + ')">' + S.tac + '</g>' : '';
+    const ilAdi = il ? '<text class="il-adi" x="' + il.m[0] + '" y="' + (il.m[1] + 19) + '">' + k(il.ad) + '</text>' : '';
 
     let liste = sirala(il ? hepsi.filter(function (h) { return h.il === il.p && (!ilce || h.ilce === ilce); }) : hepsi, harita.sira);
     let balonHikayeleri;
@@ -262,6 +286,9 @@
         return true;
       }).sort(function (a, b) { return skor[b.il] - skor[a.il]; }).slice(0, 7);
     }
+    // Lider ilin iğnesi varsa taç iğnenin üstüne takılır; yoksa haritada ilin üstünde durur.
+    const tacliIgne = lider ? balonHikayeleri.findIndex(function (h) { return h.il === lider.il; }) : -1;
+    if (tacliIgne >= 0) tac = '';
     const balonlar = balonHikayeleri.map(function (h, i) {
       const m = IL[h.il].m;
       let dx = 0, dy = -1.9;
@@ -272,10 +299,10 @@
       }
       return '<a class="balon" href="#/hikaye/' + encodeURIComponent(h.id) + '" style="left:' + (m[0] / HARITA.genislik * 100).toFixed(2) + '%;top:' +
         (m[1] / HARITA.yukseklik * 100).toFixed(2) + '%;--dx:' + dx.toFixed(2) + 'em;--dy:' + dy.toFixed(2) + 'em;animation-delay:' + (i * 70) + 'ms" title="' +
-        k(h.baslik + ' – ' + yer(h)) + '" aria-label="' + k(h.baslik + ' – ' + yer(h)) + '">' + kapak(h, 'balon-ic') + '</a>';
+        k(h.baslik + ' – ' + yer(h)) + '" aria-label="' + k(h.baslik + ' – ' + yer(h)) + '">' + kapak(h, 'balon-ic') + (i === tacliIgne ? '<span class="balon-tac">' + S('tac') + '</span>' : '') + '</a>';
     }).join('');
 
-    const donemler = '<div class="cipler" role="group" aria-label="Zaman tüneli"><span class="cip-baslik">⏳ Zaman tüneli</span>' +
+    const donemler = '<div class="cipler" role="group" aria-label="Zaman tüneli"><span class="cip-baslik">' + S('kum') + ' Zaman tüneli</span>' +
       [{ k: '', ad: 'Tümü' }].concat(DONEMLER).map(function (d) {
         return '<button type="button" class="cip' + (harita.donem === d.k ? ' secili' : '') + '" data-is="donem" data-deger="' + d.k + '" aria-pressed="' + (harita.donem === d.k) + '">' + k(d.ad) + '</button>';
       }).join('') + '</div>';
@@ -289,9 +316,9 @@
       const ilceSecimi = '<option value="">Tüm ilçeler</option>' + il.ilceler.map(function (ad) {
         return '<option value="' + k(ad) + '"' + (ad === ilce ? ' selected' : '') + '>' + k(ad) + (ilceAdet[ad] ? ' (' + ilceAdet[ad] + ')' : '') + '</option>';
       }).join('');
-      panel = '<section class="panel"><header class="panel-bas"><div><h1>' + k(il.ad) + (lider && lider.il === il.p ? ' <span title="Bu hafta Meydan’da önde">👑</span>' : '') + '</h1>' +
+      panel = '<section class="panel"><header class="panel-bas"><div><h1>' + k(il.ad) + (lider && lider.il === il.p ? ' <span title="Bu hafta Meydan’da önde">' + S('tac') + '</span>' : '') + '</h1>' +
         '<p class="kunye">' + k(il.b) + ' Bölgesi · ' + ilHikayeleri.length + ' hikaye · ' + sozler.length + ' sözlük kaydı</p></div>' +
-        '<a class="dugme" href="#/paylas?il=' + il.p + (ilce ? '&ilce=' + encodeURIComponent(ilce) : '') + '">✍️ Buradan hikaye paylaş</a></header>' +
+        '<div class="islemler">' + takipDugmesi(ilce ? 'ilce:' + il.p + ':' + ilce : 'il:' + il.p) + '<a class="dugme" href="#/paylas?il=' + il.p + (ilce ? '&ilce=' + encodeURIComponent(ilce) : '') + '">' + S('kalem') + ' Buradan hikaye paylaş</a></div></header>' +
         '<div class="arac"><label class="gizli" for="ilce-sec">İlçe</label><select id="ilce-sec" data-degis="ilce-sec" data-p="' + il.p + '">' + ilceSecimi + '</select>' +
         siraDugmeleri(harita.sira) + '<a class="baglanti" href="#/">← Tüm Türkiye</a></div>' +
         kartlar(liste, (ilce ? k(ilce) : k(il.ad)) + ' için henüz hikaye yok. İlk anlatan sen ol!') +
@@ -306,7 +333,7 @@
         (liste.length > 9 ? '<p><a class="baglanti" href="#/kesfet">Tüm hikayeleri keşfet →</a></p>' : '') + '</section>';
     }
 
-    return '<a class="meydan-serit" href="#/meydan">🏆 <span>Bu haftanın Meydan teması: <b>' + k(hafta.tema.ad) + '</b>' +
+    return '<a class="meydan-serit" href="#/meydan">' + S('kupa') + ' <span>Bu haftanın Meydan teması: <b>' + k(hafta.tema.ad) + '</b>' +
       (lider ? ' · önde: ' + k(yer(lider)) : '') + '</span><span class="saga">' + (hafta.kalan ? hafta.kalan + ' gün kaldı' : 'Son gün!') + ' →</span></a>' +
       donemler +
       '<div class="harita-kaydir"><div class="harita-kutu"><svg class="harita" viewBox="0 0 ' + HARITA.genislik + ' ' + HARITA.yukseklik +
@@ -339,8 +366,9 @@
       '<select data-degis="kesfet-donem" aria-label="Dönem">' + donemSecenekleri(suzgec.donem, 'Tüm dönemler') + '</select>' +
       '<select data-degis="kesfet-sira" aria-label="Sıralama"><option value="yeni"' + (suzgec.sira === 'yeni' ? ' selected' : '') + '>En yeni</option><option value="begeni"' + (suzgec.sira === 'begeni' ? ' selected' : '') + '>En beğenilen</option></select></div>' +
       '<div class="cipler" role="group" aria-label="Etiketler">' + ETIKETLER.map(function (e) {
-        return '<button type="button" class="cip' + (suzgec.etiket === e.ad ? ' secili' : '') + '" data-is="etiket" data-deger="' + k(e.ad) + '" aria-pressed="' + (suzgec.etiket === e.ad) + '">' + e.simge + ' #' + k(e.ad) + '</button>';
-      }).join('') + '</div><div id="sonuclar">' + kesfetSonuclari() + '</div>';
+        return '<button type="button" class="cip' + (suzgec.etiket === e.ad ? ' secili' : '') + '" data-is="etiket" data-deger="' + k(e.ad) + '" aria-pressed="' + (suzgec.etiket === e.ad) + '">' + S(e.simge) + ' #' + k(e.ad) + '</button>';
+      }).join('') + '</div>' + (suzgec.etiket ? '<p class="arac"><span class="kunye">#' + k(suzgec.etiket) + ' etiketinden yeni hikayeleri kaçırma:</span> ' + takipDugmesi('etiket:' + suzgec.etiket) + '</p>' : '') +
+      '<div id="sonuclar">' + kesfetSonuclari() + '</div>';
   }
 
   /* ---------- Hikaye ---------- */
@@ -356,18 +384,18 @@
     return '<article class="hikaye">' +
       '<p><a class="baglanti" href="#/il/' + h.il + '">← ' + k(IL[h.il].ad) + ' hikayeleri</a></p>' +
       kapak(h, 'hikaye-kapak') +
-      '<p class="kunye">📍 ' + k(yer(h)) + ' · ' + k(donemAdi(h.donem)) + (h.tema ? ' · 🏆 Meydan hikayesi' : '') + '</p>' +
+      '<p class="kunye">' + S('konum') + ' ' + k(yer(h)) + ' · ' + k(donemAdi(h.donem)) + (h.tema ? ' · ' + S('kupa') + ' Meydan hikayesi' : '') + '</p>' +
       '<h1>' + k(h.baslik) + '</h1>' +
-      '<p class="yazar-satiri"><b>' + k(y.ad) + '</b>' + ornekIsareti(h) + (gurbet ? ' · ' + k(gurbet) : '') + ' · ' + tarihYaz(h.tarih) + '</p>' +
+      '<p class="yazar-satiri"><a class="yazar-adi" href="#/kesfet?ara=' + encodeURIComponent(y.ad) + '" title="Bu yazarın hikayeleri"><b>' + k(y.ad) + '</b></a>' + ornekIsareti(h) + (gurbet ? ' · ' + k(gurbet) : '') + ' · ' + tarihYaz(h.tarih) + '</p>' +
       '<div class="metin">' + h.metin.split(/\n+/).map(function (p) { return '<p>' + k(p) + '</p>'; }).join('') + '</div>' +
       '<p class="cipler">' + (h.etiketler || []).map(function (e) {
         return '<a class="cip" href="#/kesfet?etiket=' + encodeURIComponent(e) + '">' + etiketSimgesi(e) + ' #' + k(e) + '</a>';
       }).join('') + '</p>' +
       '<div class="islemler">' +
-      '<button type="button" class="dugme' + (Depo.begendimMi(h.id) ? ' dolu' : '') + '" data-is="begen" data-id="' + k(h.id) + '" aria-pressed="' + Depo.begendimMi(h.id) + '">♥ Beğen · ' + (h.begeni || 0) + '</button>' +
-      '<button type="button" class="dugme' + (Depo.favorideMi(h.id) ? ' dolu' : '') + '" data-is="favori" data-id="' + k(h.id) + '" aria-pressed="' + Depo.favorideMi(h.id) + '">' + (Depo.favorideMi(h.id) ? '★ Favorilerimde' : '☆ Favorilere ekle') + '</button>' +
-      '<button type="button" class="dugme" data-is="dinle" data-id="' + k(h.id) + '">🔊 Dinle</button>' +
-      '<button type="button" class="dugme" data-is="gonder" data-id="' + k(h.id) + '">↗ Paylaş</button>' +
+      '<button type="button" class="dugme' + (Depo.begendimMi(h.id) ? ' dolu' : '') + '" data-is="begen" data-id="' + k(h.id) + '" aria-pressed="' + Depo.begendimMi(h.id) + '">' + S('kalp') + ' Beğen · ' + (h.begeni || 0) + '</button>' +
+      '<button type="button" class="dugme' + (Depo.favorideMi(h.id) ? ' dolu' : '') + '" data-is="favori" data-id="' + k(h.id) + '" aria-pressed="' + Depo.favorideMi(h.id) + '">' + S('yildiz') + (Depo.favorideMi(h.id) ? ' Favorilerimde' : ' Favorilere ekle') + '</button>' +
+      '<button type="button" class="dugme" data-is="dinle" data-id="' + k(h.id) + '">' + S('ses') + ' Dinle</button>' +
+      '<button type="button" class="dugme" data-is="gonder" data-id="' + k(h.id) + '">' + S('gonder') + ' Paylaş</button>' +
       (benimMi(h)
         ? '<button type="button" class="dugme sade" data-is="hikaye-sil" data-id="' + k(h.id) + '">Sil</button>'
         : '<button type="button" class="dugme sade" data-is="sikayet" data-id="' + k(h.id) + '" data-don="1">Şikâyet et</button>') +
@@ -399,10 +427,10 @@
       '<label>Bu anı hangi döneme ait?<select name="donem" required>' + donemSecenekleri('bugun', '') + '</select></label>' +
       '<fieldset><legend>Etiketler (en çok 3)</legend><div class="cipler">' + ETIKETLER.map(function (e) {
         return '<label class="cip secmeli"><input type="checkbox" name="etiket" value="' + k(e.ad) + '" data-degis="etiket-sinir"' +
-          (temali && hafta.tema.etiket === e.ad ? ' checked' : '') + '>' + e.simge + ' #' + k(e.ad) + '</label>';
+          (temali && hafta.tema.etiket === e.ad ? ' checked' : '') + '>' + S(e.simge) + ' #' + k(e.ad) + '</label>';
       }).join('') + '</div></fieldset>' +
       '<label>Fotoğraf (isteğe bağlı)<input type="file" accept="image/*" data-degis="foto"></label><div id="foto-onizleme"></div>' +
-      '<label class="onay"><input type="checkbox" name="tema"' + (temali ? ' checked' : '') + '> 🏆 Bu haftanın Meydan temasına katıl: <b>' + k(hafta.tema.ad) + '</b></label>' +
+      '<label class="onay"><input type="checkbox" name="tema"' + (temali ? ' checked' : '') + '> ' + S('kupa') + ' Bu haftanın Meydan temasına katıl: <b>' + k(hafta.tema.ad) + '</b></label>' +
       '<p class="kunye">Küfür, hakaret ve siyaset içeren paylaşımlar kabul edilmez. Başkalarının kişisel bilgilerini yazmamaya ve yalnızca sana ait fotoğrafları eklemeye özen göster.</p>' +
       '<button class="dugme dolu buyuk" type="submit">Haritaya ekle</button></form>';
   }
@@ -418,12 +446,12 @@
     const siradakiler = [1, 2, 3].map(function (i) { return TEMALAR[(hafta.temaNo + i) % TEMALAR.length].ad; });
     return '<section class="meydan-bas"><p class="ust-yazi">Haftalık Memleket Meydanı · ' + hafta.no + '. hafta</p>' +
       '<h1>' + k(hafta.tema.ad) + '</h1><p>' + k(hafta.tema.aciklama) + '</p>' +
-      '<p class="kunye">⏳ ' + (hafta.kalan ? hafta.kalan + ' gün kaldı' : 'Son gün!') + ' · Hafta sonunda en çok beğeni toplayan ilçe “Haftanın Kültür Başkenti” olur ve haritada taç takar.</p>' +
-      '<a class="dugme dolu buyuk" href="#/paylas?tema=1">✍️ Hikayenle katıl</a></section>' +
-      (gecenBaskent ? '<p class="baskent">👑 Geçen haftanın Kültür Başkenti: <b>' + k(yer(gecenBaskent)) + '</b> <span class="kunye">(' + k(onceki.tema.ad) + ')</span></p>' : '') +
+      '<p class="kunye">' + S('kum') + ' ' + (hafta.kalan ? hafta.kalan + ' gün kaldı' : 'Son gün!') + ' · Hafta sonunda en çok beğeni toplayan ilçe “Haftanın Kültür Başkenti” olur ve haritada taç takar.</p>' +
+      '<a class="dugme dolu buyuk" href="#/paylas?tema=1">' + S('kalem') + ' Hikayenle katıl</a></section>' +
+      (gecenBaskent ? '<p class="baskent">' + S('tac') + ' Geçen haftanın Kültür Başkenti: <b>' + k(yer(gecenBaskent)) + '</b> <span class="kunye">(' + k(onceki.tema.ad) + ')</span></p>' : '') +
       '<h2>Bu haftanın sıralaması</h2>' +
       (siralama.length ? '<ol class="siralama">' + siralama.slice(0, 10).map(function (s, i) {
-        return '<li><span class="sira-no">' + (i ? i + 1 : '👑') + '</span><a href="#/il/' + s.il + (s.ilce ? '/' + encodeURIComponent(s.ilce) : '') + '">' + k(yer(s)) + '</a>' +
+        return '<li><span class="sira-no">' + (i ? i + 1 : S('tac')) + '</span><a href="#/il/' + s.il + (s.ilce ? '/' + encodeURIComponent(s.ilce) : '') + '">' + k(yer(s)) + '</a>' +
           '<span class="saga">' + s.puan + ' puan · ' + s.adet + ' hikaye</span></li>';
       }).join('') + '</ol>' : '<p class="bos">Meydan henüz boş. İlk hikayeyi paylaşan ilçe öne geçer!</p>') +
       '<h2>Temanın hikayeleri</h2>' + kartlar(hikayeler, 'Bu haftanın temasında henüz hikaye yok.') +
@@ -447,9 +475,9 @@
         '<b>' + (s.oy || 0) + '</b>' +
         '<button type="button" data-is="oy" data-id="' + k(s.id) + '" data-yon="-1" class="' + (oyum === -1 ? 'secili' : '') + '" aria-pressed="' + (oyum === -1) + '" aria-label="Emin değilim" title="Emin değilim">▼</button></div>' +
         '<div class="soz-ic"><h3>' + k(s.baslik) + ornekIsareti(s) + '</h3>' +
-        '<p class="kunye">📍 <a href="#/il/' + s.il + '">' + k(yer(s)) + '</a> · ' + k(s.yazar.ad) + '</p>' +
+        '<p class="kunye">' + S('konum') + ' <a href="#/il/' + s.il + '">' + k(yer(s)) + '</a> · ' + k(s.yazar.ad) + '</p>' +
         '<p>' + k(s.aciklama) + '</p>' + (s.ornekCumle ? '<p class="ornek-cumle">“' + k(s.ornekCumle) + '”</p>' : '') +
-        '<p class="soz-islem">' + (s.ses ? '<button type="button" class="baglanti" data-is="ses-cal" data-id="' + k(s.id) + '">🔊 Okunuşunu dinle</button>' : '') +
+        '<p class="soz-islem">' + (s.ses ? '<button type="button" class="baglanti" data-is="ses-cal" data-id="' + k(s.id) + '">' + S('ses') + ' Okunuşunu dinle</button>' : '') +
         '<button type="button" class="baglanti" data-is="' + (benimMi(s) ? 'sozluk-sil' : 'sikayet') + '" data-id="' + k(s.id) + '">' + (benimMi(s) ? 'Sil' : 'Şikâyet et') + '</button></p></div></article>';
     }).join('');
   }
@@ -457,8 +485,8 @@
     const kelime = sozlukDurum.tur === 'kelime';
     return '<h1>Yöresel Sözlük</h1><p class="kunye">“Bizim orada buna … denir.” Kelimeni ekle, okunuşunu kaydet; başkalarınınkini oyla.</p>' +
       '<div class="sekmeler" role="tablist">' +
-      '<button type="button" role="tab" data-is="sekme" data-deger="kelime" aria-selected="' + kelime + '"' + (kelime ? ' class="secili"' : '') + '>🗣️ Kelimeler ve deyimler</button>' +
-      '<button type="button" role="tab" data-is="sekme" data-deger="meshur" aria-selected="' + !kelime + '"' + (!kelime ? ' class="secili"' : '') + '>⭐ Nesi meşhur?</button></div>' +
+      '<button type="button" role="tab" data-is="sekme" data-deger="kelime" aria-selected="' + kelime + '"' + (kelime ? ' class="secili"' : '') + '>' + S('soz') + ' Kelimeler ve deyimler</button>' +
+      '<button type="button" role="tab" data-is="sekme" data-deger="meshur" aria-selected="' + !kelime + '"' + (!kelime ? ' class="secili"' : '') + '>' + S('yildiz') + ' Nesi meşhur?</button></div>' +
       '<details class="ekle"' + (sayfaSozluk.acik ? ' open' : '') + '><summary class="dugme dolu">＋ ' + (kelime ? 'Kelime ekle' : 'Meşhur bir şey ekle') + '</summary>' +
       '<form id="f-sozluk" class="form">' + adAlani() +
       '<div class="ikiye"><label>İl<select name="il" required data-degis="form-il" data-hedef="sozluk-ilce">' + ilSecenekleri(sozlukDurum.il || Depo.profil.memleket || '', 'İl seç…') + '</select></label>' +
@@ -466,7 +494,7 @@
       '<label>' + (kelime ? 'Kelime ya da deyim' : 'Nesi meşhur?') + '<input name="baslik" required maxlength="60" placeholder="' + (kelime ? 'Örn. Gakgoş' : 'Örn. Cağ kebabı') + '"></label>' +
       '<label>' + (kelime ? 'Anlamı' : 'Kısaca anlat') + '<textarea name="aciklama" required maxlength="300" rows="2"></textarea></label>' +
       (kelime ? '<label>Örnek cümle (isteğe bağlı)<input name="ornekCumle" maxlength="160"></label>' +
-        '<div class="ses-kayit"><button type="button" class="dugme" data-is="ses-kaydet">🎙️ Okunuşunu kaydet</button><span id="ses-onizleme" class="kunye">En çok 8 saniye.</span></div>' : '') +
+        '<div class="ses-kayit"><button type="button" class="dugme" data-is="ses-kaydet">' + S('mikrofon') + ' Okunuşunu kaydet</button><span id="ses-onizleme" class="kunye">En çok 8 saniye.</span></div>' : '') +
       '<button class="dugme dolu" type="submit">Sözlüğe ekle</button></form></details>' +
       '<div class="arac"><label class="gizli" for="sozluk-ara">Sözlükte ara</label><input id="sozluk-ara" class="genis" type="search" placeholder="Sözlükte ara…" autocomplete="off" value="' + k(sozlukDurum.ara) + '">' +
       '<select data-degis="sozluk-il" aria-label="İl">' + ilSecenekleri(sozlukDurum.il, 'Tüm iller') + '</select></div>' +
@@ -475,27 +503,71 @@
 
   /* ---------- Benim Hikayem ---------- */
 
+  // Radar kişi göstermez: hemşehrilerin hangi şehirlerde kaç kişi olduğunu ve hikayelerini listeler.
   function radarBolumu() {
     const p = Depo.profil;
-    if (!p.radar) return '<p class="bos">Radar kapalı. Açarsan senin memleketinden olup anılarını paylaşanları burada görürsün; sen de onların radarında görünürsün.</p>';
-    if (!p.memleket) return '<p class="bos">Radarın çalışması için yukarıdan memleketini seç.</p>';
-    const hemsehriler = {};
+    if (!p.radar) return '<p class="bos">Radar kapalı. Açarsan memleketinden kaç kişinin hangi şehirlerde hikaye paylaştığını görürsün; sen de yalnızca sayıya eklenirsin, adın gösterilmez.</p>';
+    if (!p.memleket) return '<p class="bos">Radarın çalışması için aşağıdan memleketini seç.</p>';
+    const sehirler = {};
     Depo.hikayeler().forEach(function (h) {
       const y = h.yazar;
       if (y.id === p.id || !y.radar || y.memleket !== p.memleket) return;
-      (hemsehriler[y.id] || (hemsehriler[y.id] = { yazar: y, hikayeler: [] })).hikayeler.push(h);
+      const s = sehirler[y.yasadigi || 0] || (sehirler[y.yasadigi || 0] = { il: y.yasadigi || 0, kisiler: {}, hikayeler: [] });
+      s.kisiler[y.id] = true;
+      s.hikayeler.push(h);
     });
-    const liste = Object.keys(hemsehriler).map(function (a) { return hemsehriler[a]; })
-      .sort(function (a, b) { return (b.yazar.yasadigi === p.yasadigi) - (a.yazar.yasadigi === p.yasadigi); });
-    if (!liste.length) return '<p class="bos">Şimdilik radarında ' + k(IL[p.memleket].ad) + ' ilinden başka kimse yok. Hikayeni paylaş, seni bulsunlar.</p>';
+    const liste = Object.keys(sehirler).map(function (a) { return sehirler[a]; }).sort(function (a, b) {
+      return (b.il === p.yasadigi) - (a.il === p.yasadigi) || Object.keys(b.kisiler).length - Object.keys(a.kisiler).length;
+    });
+    if (!liste.length) return '<p class="bos">Şimdilik radarında ' + k(IL[p.memleket].ad) + ' ilinden başka kimse yok. Hikayeni paylaş, hemşehrilerin görsün.</p>';
     return '<ul class="radar">' + liste.map(function (g) {
-      const y = g.yazar;
-      const ayniSehir = p.yasadigi && y.yasadigi === p.yasadigi;
-      return '<li' + (ayniSehir ? ' class="yakin"' : '') + '><p><b>' + k(y.ad) + '</b> · ' + (y.yasadigi ? k(IL[y.yasadigi].ad) + ' ilinde yaşıyor' : '') +
-        (ayniSehir ? ' <span class="ornek-isareti">Seninle aynı şehirde</span>' : '') + '</p>' +
+      const ayniSehir = p.yasadigi && g.il === p.yasadigi;
+      return '<li' + (ayniSehir ? ' class="yakin"' : '') + '><p><b>' + (g.il ? k(IL[g.il].ad) : 'Yaşadığı yeri belirtmeyenler') + '</b> · ' +
+        Object.keys(g.kisiler).length + ' hemşehrin, ' + g.hikayeler.length + ' hikaye' +
+        (ayniSehir ? ' <span class="ornek-isareti">Senin şehrin</span>' : '') + '</p>' +
         g.hikayeler.map(function (h) { return '<a class="baglanti" href="#/hikaye/' + encodeURIComponent(h.id) + '">' + k(h.baslik) + '</a>'; }).join(' · ') + '</li>';
     }).join('') + '</ul>';
   }
+
+  /* Yer takibi: kişiler değil iller, ilçeler ve etiketler takip edilir. Anahtarlar: il:24, ilce:24:Kemaliye, etiket:YaylaYolu */
+  function takipler() { return Depo.ayar('takip') || []; }
+  function takipAdi(anahtar) {
+    const p = anahtar.split(':');
+    if (p[0] === 'etiket') return '#' + p[1];
+    const il = IL[p[1]] ? IL[p[1]].ad : '';
+    return p[0] === 'ilce' ? p.slice(2).join(':') + ', ' + il : il;
+  }
+  function takipBaglantisi(anahtar) {
+    const p = anahtar.split(':');
+    if (p[0] === 'etiket') return '#/kesfet?etiket=' + encodeURIComponent(p[1]);
+    return '#/il/' + p[1] + (p[0] === 'ilce' ? '/' + encodeURIComponent(p.slice(2).join(':')) : '');
+  }
+  function takipteMi(h) {
+    const t = takipler();
+    return t.indexOf('il:' + h.il) >= 0 || (h.ilce && t.indexOf('ilce:' + h.il + ':' + h.ilce) >= 0) ||
+      (h.etiketler || []).some(function (e) { return t.indexOf('etiket:' + e) >= 0; });
+  }
+  function takipHikayeleri() {
+    return sirala(Depo.hikayeler().filter(function (h) { return !benimMi(h) && takipteMi(h); }), 'yeni');
+  }
+  function yeniTakipSayisi() {
+    const gorulen = Depo.ayar('takipGorulen') || '';
+    return takipHikayeleri().filter(function (h) { return h.tarih > gorulen; }).length;
+  }
+  function takipDugmesi(anahtar) {
+    const takipte = takipler().indexOf(anahtar) >= 0;
+    return '<button type="button" class="dugme' + (takipte ? ' dolu' : '') + '" data-is="takip" data-deger="' + k(anahtar) + '" aria-pressed="' + takipte + '">' +
+      S('zil') + (takipte ? ' Takiptesin' : ' Takip et') + '</button>';
+  }
+  function takipBolumu() {
+    const t = takipler();
+    if (!t.length) return '<p class="bos">Bir ili, ilçeyi ya da etiketi takip et; oradan gelen yeni hikayeler burada birikir. Haritada bir ile dokunup “Takip et”e bas.</p>';
+    return '<p class="cipler">' + t.map(function (a) {
+      return '<span class="cip"><a href="' + takipBaglantisi(a) + '">' + k(takipAdi(a)) + '</a>' +
+        '<button type="button" class="cip-kaldir" data-is="takip" data-deger="' + k(a) + '" aria-label="' + k(takipAdi(a)) + ' takibini bırak" title="Takibi bırak">×</button></span>';
+    }).join('') + '</p>' + kartlar(takipHikayeleri().slice(0, 6), 'Takip ettiğin yerlerden henüz hikaye yok.');
+  }
+
   function sayfaBen() {
     const p = Depo.profil;
     const kt = katkilar(p.id);
@@ -508,26 +580,34 @@
       (p.yasadigi ? ' · Yaşadığı yer: ' + k(IL[p.yasadigi].ad) : '') + '</p></div>' +
       '<div class="puan"><b>' + puan + '</b><span>kültür puanı</span></div></section>' +
       '<h2>Rozetlerim</h2><ul class="rozetler">' + rz.map(function (r) {
-        return '<li class="' + (r.var ? 'var' : 'yok') + '" title="' + k(r.aciklama) + '"><span aria-hidden="true">' + r.simge + '</span><b>' + k(r.ad) + '</b><small>' + k(r.aciklama) + '</small></li>';
+        return '<li class="' + (r.var ? 'var' : 'yok') + '" title="' + k(r.aciklama) + '"><span aria-hidden="true">' + S(r.simge) + '</span><b>' + k(r.ad) + '</b><small>' + k(r.aciklama) + '</small></li>';
       }).join('') + '</ul>' +
       '<h2>Anı defterim</h2>' + (benimkiler.length ? '<ol class="defter">' + benimkiler.map(function (h) {
         return '<li><time datetime="' + k(h.tarih) + '">' + tarihYaz(h.tarih) + '</time><a href="#/hikaye/' + encodeURIComponent(h.id) + '">' +
           (h.foto ? '<img src="' + k(h.foto) + '" alt="" loading="lazy">' : '') +
-          '<strong>' + k(h.baslik) + '</strong><span class="kunye">📍 ' + k(yer(h)) + ' · ' + k(donemAdi(h.donem)) + ' · ♥ ' + (h.begeni || 0) + '</span>' +
+          '<strong>' + k(h.baslik) + '</strong><span class="kunye">' + S('konum') + ' ' + k(yer(h)) + ' · ' + k(donemAdi(h.donem)) + ' · ' + S('kalp') + ' ' + (h.begeni || 0) + '</span>' +
           '<span class="ozet">' + k(h.metin.slice(0, 220)) + (h.metin.length > 220 ? '…' : '') + '</span></a></li>';
       }).join('') + '</ol>' : '<p class="bos">Defterin henüz boş. <a class="baglanti" href="#/paylas">İlk anını yaz →</a></p>') +
       '<h2>Favorilerim</h2>' + kartlar(favoriler, 'Beğendiğin hikayelerde “Favorilere ekle”ye dokun; burada birikir.') +
+      '<h2>Takip ettiklerim' + (benYeni ? ' <span class="ornek-isareti">' + benYeni + ' yeni</span>' : '') + '</h2>' + takipBolumu() +
       '<h2>Hemşehri Radarı</h2>' + radarBolumu() +
       '<h2>Profilim</h2><form id="f-profil" class="form">' +
       '<label>Adın<input name="ad" maxlength="40" value="' + k(p.ad) + '" autocomplete="nickname" required></label>' +
       '<div class="ikiye"><label>Memleketin<select name="memleket" data-degis="form-il" data-hedef="profil-ilce">' + ilSecenekleri(p.memleket || '', 'İl seç…') + '</select></label>' +
       '<label>İlçe<select name="memleketIlce" id="profil-ilce">' + ilceSecenekleri(p.memleket, p.memleketIlce, 'İlçe seç (isteğe bağlı)') + '</select></label></div>' +
       '<label>Şu an yaşadığın il<select name="yasadigi">' + ilSecenekleri(p.yasadigi || '', 'İl seç…') + '</select></label>' +
-      '<label class="onay"><input type="checkbox" name="radar"' + (p.radar ? ' checked' : '') + '> Hemşehri Radarı’nda görünmek istiyorum (isteğe bağlı)</label>' +
+      '<label class="onay"><input type="checkbox" name="radar"' + (p.radar ? ' checked' : '') + '> Hemşehri Radarı’nda sayılmak istiyorum (isteğe bağlı; adın gösterilmez)</label>' +
       '<button class="dugme dolu" type="submit">Kaydet</button></form>' +
       '<h2>Ayarlar</h2><div class="islemler">' +
       (Depo.ornekVarMi() ? '<button type="button" class="dugme" data-is="ornek-kaldir">Örnek içeriği kaldır</button>' : '') +
-      '<button type="button" class="dugme" data-is="tema">◐ Açık / koyu tema</button></div>' +
+      '<button type="button" class="dugme" data-is="tema">' + S('tema') + ' Açık / koyu tema</button></div>' +
+      '<h3 class="ayar-baslik">Renkler</h3><div class="renkler" role="group" aria-label="Renk teması">' +
+      [{ k: 'oto', ad: 'Memleketime göre' }].concat(RENKLER).map(function (r) {
+        const secili = (Depo.ayar('renk') || 'oto') === r.k;
+        return '<button type="button" class="renk-sec' + (secili ? ' secili' : '') + '" data-is="renk" data-deger="' + r.k + '" data-renk="' +
+          (r.k === 'oto' ? memleketRengi() : r.k) + '" aria-pressed="' + secili + '"><i></i><span>' + k(r.ad) +
+          (r.bolge ? '<small>' + k(r.bolge) + '</small>' : '<small>' + (p.memleket ? k(IL[p.memleket].b) : 'memleketini seçince') + '</small>') + '</span></button>';
+      }).join('') + '</div>' +
       '<p class="kunye">Bu sürümde paylaşımların yalnızca bu cihazda saklanır' + (Depo.kalici ? '.' : '; tarayıcın kalıcı depolamaya izin vermediği için sayfa kapanınca silinebilir.') + '</p>';
   }
 
@@ -561,6 +641,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
       if (a.dataset.sayfa === y.sayfa) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
+    document.querySelector('.menu [data-sayfa="ben"]').classList.toggle('yeni', yeniTakipSayisi() > 0);
     const h = y.sayfa === 'hikaye' && Depo.hikaye(y.parca[1]);
     document.title = (h ? h.baslik : BASLIKLAR[y.sayfa] || 'Harita') + ' – Memleket Hikayeleri';
   }
@@ -589,6 +670,11 @@
     if (y.sayfa === 'kesfet') {
       if (y.sorgu.has('etiket')) suzgec.etiket = y.sorgu.get('etiket');
       if (y.sorgu.has('il')) suzgec.il = y.sorgu.get('il');
+      if (y.sorgu.has('ara')) { suzgec.ara = y.sorgu.get('ara'); suzgec.etiket = suzgec.il = suzgec.donem = ''; }
+    }
+    if (y.sayfa === 'ben') {
+      benYeni = yeniTakipSayisi();
+      Depo.ayarYaz('takipGorulen', new Date().toISOString());
     }
     if (y.sayfa === 'sozluk' && y.sorgu.has('il')) sozlukDurum.il = y.sorgu.get('il');
     ciz();
@@ -610,9 +696,9 @@
     soz.rate = 0.95;
     soz.onend = soz.onerror = function () {
       const d = document.querySelector('[data-is="dinle"]');
-      if (d) d.textContent = '🔊 Dinle';
+      if (d) d.innerHTML = S('ses') + ' Dinle';
     };
-    dugme.textContent = '⏹ Durdur';
+    dugme.innerHTML = S('dur') + ' Durdur';
     ss.speak(soz);
   }
 
@@ -638,12 +724,12 @@
           const kutu = document.getElementById('ses-onizleme');
           if (kutu) kutu.innerHTML = '<audio controls src="' + k(yeniSes) + '"></audio>';
           const d = document.querySelector('[data-is="ses-kaydet"]');
-          if (d) d.textContent = '🎙️ Yeniden kaydet';
+          if (d) d.innerHTML = S('mikrofon') + ' Yeniden kaydet';
         };
         okuyucu.readAsDataURL(new Blob(parcalar, { type: kd.mimeType }));
       };
       kd.start();
-      dugme.textContent = '⏹ Kaydı bitir';
+      dugme.innerHTML = S('dur') + ' Kaydı bitir';
     }).catch(function () { bildir('Mikrofona erişilemedi. Tarayıcı izinlerini kontrol et.'); });
   }
 
@@ -734,6 +820,16 @@
       document.documentElement.dataset.tema = koyu ? 'acik' : 'koyu';
       Depo.ayarYaz('tema', document.documentElement.dataset.tema);
     },
+    takip: function (d) {
+      const a = d.dataset.deger;
+      const t = takipler();
+      const i = t.indexOf(a);
+      if (i >= 0) t.splice(i, 1); else t.push(a);
+      Depo.ayarYaz('takip', t);
+      bildir(i >= 0 ? takipAdi(a) + ' takibi bırakıldı.' : takipAdi(a) + ' takipte. Yeni hikayeler Benim Hikayem’de birikir.');
+      ciz();
+    },
+    renk: function (d) { Depo.ayarYaz('renk', d.dataset.deger); renkUygula(); ciz(); },
     yukle: function (d) {
       if (!yuklemeIstegi) return;
       yuklemeIstegi.prompt();
@@ -804,7 +900,7 @@
       const a = f.elements;
       if (!uygunMu(f)) return;
       Depo.profilKaydet({ ad: a.ad.value.trim(), memleket: +a.memleket.value || null, memleketIlce: a.memleketIlce.value,
-        yasadigi: +a.yasadigi.value || null, radar: a.radar.checked }).then(function () { ciz(); bildir('Profilin kaydedildi.'); });
+        yasadigi: +a.yasadigi.value || null, radar: a.radar.checked }).then(function () { renkUygula(); ciz(); bildir('Profilin kaydedildi.'); });
     }
   };
 
@@ -843,7 +939,10 @@
   });
   window.addEventListener('hashchange', git);
 
+  Array.prototype.forEach.call(document.querySelectorAll('[data-simge]'), function (e) { e.innerHTML = S(e.dataset.simge); });
+
   Depo.hazirla(ornekUret).catch(function () { /* depo açılamadıysa boş başlar */ }).then(function () {
+    renkUygula();
     git();
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () {});
   });
