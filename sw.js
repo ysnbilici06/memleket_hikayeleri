@@ -1,7 +1,7 @@
 /* Memleket Hikayeleri – çevrimdışı çalışma.
    Uygulama dosyaları önbellekten hemen verilir, arka planda yenisi indirilir;
    değişiklikler bir sonraki açılışta görünür. Dosya listesi değişirse KABUK adındaki sayı artırılır. */
-var KABUK = 'mh-kabuk-2';
+var KABUK = 'mh-kabuk-3';
 var DOSYALAR = [
   './', 'index.html', 'manifest.webmanifest', 'css/stil.css',
   'js/depo.js', 'js/denetim.js', 'js/simgeler.js', 'js/uygulama.js', 'data/iller.js', 'data/ornekler.js',

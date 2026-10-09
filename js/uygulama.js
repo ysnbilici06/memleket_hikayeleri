@@ -43,7 +43,7 @@
     28: 'Uşak', 52: 'Uşak', 8: 'Uşak', 6: 'Seğmen', 18: 'Yâran', 58: 'Yiğido', 22: 'Pehlivan' };
   const UNVAN_ESIGI = 50;
 
-  // Renk temaları bölgelere göre adlandırılır; "oto" seçiliyken kullanıcının memleketinin bölgesi uygulanır.
+  // Varsayılan "ana" temadır. Diğerleri bölgelere göre adlandırılır; "oto" seçiliyken kullanıcının memleketinin bölgesi uygulanır.
   const RENKLER = [
     { k: 'toprak', ad: 'Toprak', bolge: 'İç Anadolu' }, { k: 'karadeniz', ad: 'Yayla Yeşili', bolge: 'Karadeniz' },
     { k: 'ege', ad: 'Ege Mavisi', bolge: 'Ege' }, { k: 'akdeniz', ad: 'Akdeniz Güneşi', bolge: 'Akdeniz' },
@@ -139,10 +139,10 @@
   function memleketRengi() {
     const il = IL[Depo.profil.memleket];
     const r = il && RENKLER.find(function (x) { return x.bolge === il.b; });
-    return r ? r.k : 'toprak';
+    return r ? r.k : 'ana';
   }
   function renkUygula() {
-    const secim = Depo.ayar('renk') || 'oto';
+    const secim = Depo.ayar('renk') || 'ana';
     const etkin = secim === 'oto' ? memleketRengi() : secim;
     document.documentElement.dataset.renk = etkin;
     if (Depo.ayar('renkEtkin') !== etkin) Depo.ayarYaz('renkEtkin', etkin);
@@ -602,8 +602,8 @@
       (Depo.ornekVarMi() ? '<button type="button" class="dugme" data-is="ornek-kaldir">Örnek içeriği kaldır</button>' : '') +
       '<button type="button" class="dugme" data-is="tema">' + S('tema') + ' Açık / koyu tema</button></div>' +
       '<h3 class="ayar-baslik">Renkler</h3><div class="renkler" role="group" aria-label="Renk teması">' +
-      [{ k: 'oto', ad: 'Memleketime göre' }].concat(RENKLER).map(function (r) {
-        const secili = (Depo.ayar('renk') || 'oto') === r.k;
+      [{ k: 'ana', ad: 'Memleket Mavisi', bolge: 'Ana tema' }, { k: 'oto', ad: 'Memleketime göre' }].concat(RENKLER).map(function (r) {
+        const secili = (Depo.ayar('renk') || 'ana') === r.k;
         return '<button type="button" class="renk-sec' + (secili ? ' secili' : '') + '" data-is="renk" data-deger="' + r.k + '" data-renk="' +
           (r.k === 'oto' ? memleketRengi() : r.k) + '" aria-pressed="' + secili + '"><i></i><span>' + k(r.ad) +
           (r.bolge ? '<small>' + k(r.bolge) + '</small>' : '<small>' + (p.memleket ? k(IL[p.memleket].b) : 'memleketini seçince') + '</small>') + '</span></button>';

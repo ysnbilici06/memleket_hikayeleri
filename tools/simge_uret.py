@@ -6,7 +6,7 @@ Kullanım: python tools/simge_uret.py
 import os
 from PIL import Image, ImageDraw
 
-ZEMIN, KREM = (168, 73, 42, 255), (255, 247, 236, 255)
+ZEMIN, KREM = (36, 86, 230, 255), (255, 255, 255, 255)
 HEDEF = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets', 'simge')
 
 

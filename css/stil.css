@@ -1,27 +1,28 @@
-/* Memleket Hikayeleri – bölgelere göre renk temaları; her birinin açık ve koyu hali var. */
+/* Memleket Hikayeleri – canlı ana tema ve bölgelere göre renk temaları; her birinin açık ve koyu hali var. */
 /* Renk teması: --ton (zemin tonu), --doy (zemin doygunluğu), --v-a/--v-k (vurgu: açık/koyu), --i-a/--i-k (ikincil: açık/koyu).
    Diğer bütün renkler bunlardan türetilir; tema eklemek için aşağıya bir satır yazmak yeter. */
-:root, [data-renk="toprak"] { --ton: 36; --doy: 55%; --v-a: #a8492a; --v-k: #e08a55; --i-a: #5f7040; --i-k: #a9bb7c; }
-[data-renk="karadeniz"] { --ton: 150; --doy: 26%; --v-a: #1d6b49; --v-k: #6fd09c; --i-a: #8a5a1c; --i-k: #dcae6c; }
-[data-renk="ege"] { --ton: 192; --doy: 34%; --v-a: #0e6a82; --v-k: #62c6de; --i-a: #66752a; --i-k: #bccb7c; }
-[data-renk="akdeniz"] { --ton: 32; --doy: 72%; --v-a: #b84a08; --v-k: #f6a455; --i-a: #136a8a; --i-k: #70c2e2; }
-[data-renk="marmara"] { --ton: 335; --doy: 32%; --v-a: #9a2d5d; --v-k: #ee92b8; --i-a: #2c5f8a; --i-k: #8abbe2; }
-[data-renk="dogu"] { --ton: 222; --doy: 28%; --v-a: #3a5796; --v-k: #98b2f2; --i-a: #8a4a2a; --i-k: #e2a47c; }
-[data-renk="guneydogu"] { --ton: 14; --doy: 48%; --v-a: #8a2c3a; --v-k: #ee8f9b; --i-a: #80580c; --i-k: #e2ba64; }
+:root, [data-renk="ana"] { --ton: 222; --doy: 60%; --v-a: #2456e6; --v-k: #7da2ff; --i-a: #c9420f; --i-k: #ffa070; }
+[data-renk="toprak"] { --ton: 30; --doy: 60%; --v-a: #b8431d; --v-k: #f08c5a; --i-a: #4f7a2a; --i-k: #a9cf7c; }
+[data-renk="karadeniz"] { --ton: 150; --doy: 45%; --v-a: #0f7a4c; --v-k: #5fdc9c; --i-a: #9a5a0c; --i-k: #f0b25c; }
+[data-renk="ege"] { --ton: 195; --doy: 60%; --v-a: #07759a; --v-k: #56cdf0; --i-a: #5f7a14; --i-k: #c2da6c; }
+[data-renk="akdeniz"] { --ton: 28; --doy: 85%; --v-a: #c94700; --v-k: #ffa24a; --i-a: #0a6c98; --i-k: #62c8f2; }
+[data-renk="marmara"] { --ton: 330; --doy: 55%; --v-a: #b0246a; --v-k: #f78dbc; --i-a: #1f5fa8; --i-k: #84bdf2; }
+[data-renk="dogu"] { --ton: 232; --doy: 50%; --v-a: #3350c4; --v-k: #92aaff; --i-a: #a2481a; --i-k: #f2a274; }
+[data-renk="guneydogu"] { --ton: 350; --doy: 55%; --v-a: #a8233a; --v-k: #f58a9a; --i-a: #8a5a00; --i-k: #f0bc54; }
 :root {
-  --zemin: hsl(var(--ton) var(--doy) 92%);
-  --kart: hsl(var(--ton) var(--doy) 98%);
-  --metin: hsl(var(--ton) 32% 15%);
-  --soluk: hsl(var(--ton) 16% 37%);
-  --cizgi: hsl(var(--ton) var(--doy) 82%);
+  --zemin: hsl(var(--ton) var(--doy) 97%);
+  --kart: #fff;
+  --metin: hsl(var(--ton) 45% 13%);
+  --soluk: hsl(var(--ton) 16% 38%);
+  --cizgi: hsl(var(--ton) var(--doy) 89%);
   --vurgu: var(--v-a);
   --vurgu-ustu: #fff;
   --ikincil: var(--i-a);
-  --altin: #c08a2e;
-  --harita-bos: hsl(var(--ton) var(--doy) 86%);
-  --harita-sinir: var(--kart);
-  --deniz: #cfe3ea;
-  --golge: 0 2px 10px rgba(60, 45, 30, .13);
+  --altin: #f0a81e;
+  --harita-bos: hsl(var(--ton) var(--doy) 92%);
+  --harita-sinir: #fff;
+  --deniz: #bfe3fa;
+  --golge: 0 2px 12px rgba(20, 35, 80, .1);
   --yazi: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --baslik: Georgia, "Palatino Linotype", "Book Antiqua", serif;
   color-scheme: light;
@@ -30,14 +31,14 @@
   :root:not([data-tema="acik"]) {
     --zemin: hsl(var(--ton) 22% 9%); --kart: hsl(var(--ton) 22% 13%); --metin: hsl(var(--ton) 35% 89%); --soluk: hsl(var(--ton) 18% 66%);
     --cizgi: hsl(var(--ton) 20% 23%); --vurgu: var(--v-k); --vurgu-ustu: hsl(var(--ton) 30% 8%); --ikincil: var(--i-k); --altin: #e2b45c;
-    --harita-bos: hsl(var(--ton) 16% 24%); --deniz: #14272f; --golge: 0 2px 12px rgba(0, 0, 0, .45);
+    --harita-bos: hsl(var(--ton) 16% 24%); --deniz: #14272f; --harita-sinir: hsl(var(--ton) 22% 9%); --golge: 0 2px 12px rgba(0, 0, 0, .45);
     color-scheme: dark;
   }
 }
 :root[data-tema="koyu"] {
     --zemin: hsl(var(--ton) 22% 9%); --kart: hsl(var(--ton) 22% 13%); --metin: hsl(var(--ton) 35% 89%); --soluk: hsl(var(--ton) 18% 66%);
     --cizgi: hsl(var(--ton) 20% 23%); --vurgu: var(--v-k); --vurgu-ustu: hsl(var(--ton) 30% 8%); --ikincil: var(--i-k); --altin: #e2b45c;
-    --harita-bos: hsl(var(--ton) 16% 24%); --deniz: #14272f; --golge: 0 2px 12px rgba(0, 0, 0, .45);
+    --harita-bos: hsl(var(--ton) 16% 24%); --deniz: #14272f; --harita-sinir: hsl(var(--ton) 22% 9%); --golge: 0 2px 12px rgba(0, 0, 0, .45);
     color-scheme: dark;
 }
 
@@ -148,19 +149,18 @@ span.cip { cursor: default; }
 .harita-kutu { position: relative; min-width: 660px; }
 /* Kara, denizin üstünde hafif kabartma gibi durur. */
 .harita { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 1.5px 0 rgba(40, 30, 20, .35)) drop-shadow(0 7px 9px rgba(20, 40, 50, .22)); }
-.il { stroke: var(--harita-sinir); stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: fill .2s; outline: none; }
+.il { stroke: var(--harita-sinir); stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: fill .15s, filter .15s; outline: none; }
 .isi0 { fill: var(--harita-bos); }
-.isi1 { fill: color-mix(in srgb, var(--vurgu) 28%, var(--harita-bos)); }
-.isi2 { fill: color-mix(in srgb, var(--vurgu) 50%, var(--harita-bos)); }
-.isi3 { fill: color-mix(in srgb, var(--vurgu) 74%, var(--harita-bos)); }
+.isi1 { fill: color-mix(in srgb, var(--vurgu) 32%, var(--harita-bos)); }
+.isi2 { fill: color-mix(in srgb, var(--vurgu) 56%, var(--harita-bos)); }
+.isi3 { fill: color-mix(in srgb, var(--vurgu) 80%, var(--harita-bos)); }
 .isi4 { fill: var(--vurgu); }
-path.isi3, path.isi4 { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--altin) 80%, transparent)); }
-path.isi4 { animation: parla 2.8s ease-in-out infinite; }
-.il:hover, .il:focus-visible { fill: var(--altin); }
+path.isi3, path.isi4 { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--vurgu) 55%, transparent)); }
+/* Üzerine gelinen il, temanın ana rengiyle ve biraz daha parlak boyanır. */
+.il:hover, .il:focus-visible { fill: var(--vurgu); filter: brightness(1.22) saturate(1.15); stroke-width: 1.8; }
 .il.secili { stroke: var(--metin); stroke-width: 2.4; }
 .il-adi { font: 700 13px var(--yazi); text-anchor: middle; fill: var(--metin); paint-order: stroke; stroke: var(--kart); stroke-width: 3.5px; pointer-events: none; }
 .tac { pointer-events: none; filter: drop-shadow(0 1.5px 1.5px rgba(0, 0, 0, .4)); }
-@keyframes parla { 50% { filter: drop-shadow(0 0 8px var(--altin)); } }
 
 .balonlar { position: absolute; inset: 0; pointer-events: none; font-size: clamp(12px, 1.5vw, 17px); }
 /* Harita iğnesi: yuvarlak fotoğraf, altında yeri gösteren uç ve zemine düşen gölge. */
@@ -186,7 +186,7 @@ path.isi4 { animation: parla 2.8s ease-in-out infinite; }
   display: grid; place-items: center;
   color: #fff; background:
     radial-gradient(90% 120% at 15% 0%, rgba(255, 255, 255, .28), transparent 60%),
-    linear-gradient(135deg, hsl(var(--kapak) 38% 58%), hsl(calc(var(--kapak) + 35) 42% 36%));
+    linear-gradient(135deg, hsl(var(--kapak) 68% 58%), hsl(calc(var(--kapak) + 35) 62% 40%));
 }
 .bos-kapak .sg { width: 1.25em; height: 1.25em; stroke-width: 1.4; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .25)); }
 .bos-kapak .sg .d { fill-opacity: .3; }
@@ -194,9 +194,9 @@ path.isi4 { animation: parla 2.8s ease-in-out infinite; }
 .harita-alt { justify-content: space-between; }
 .gosterge { display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; color: var(--soluk); }
 .gosterge i { width: 16px; height: 10px; border-radius: 3px; }
-.gosterge .isi1 { background: color-mix(in srgb, var(--vurgu) 28%, var(--harita-bos)); }
-.gosterge .isi2 { background: color-mix(in srgb, var(--vurgu) 50%, var(--harita-bos)); }
-.gosterge .isi3 { background: color-mix(in srgb, var(--vurgu) 74%, var(--harita-bos)); }
+.gosterge .isi1 { background: color-mix(in srgb, var(--vurgu) 32%, var(--harita-bos)); }
+.gosterge .isi2 { background: color-mix(in srgb, var(--vurgu) 56%, var(--harita-bos)); }
+.gosterge .isi3 { background: color-mix(in srgb, var(--vurgu) 80%, var(--harita-bos)); }
 .gosterge .isi4 { background: var(--vurgu); }
 
 .panel { margin-top: 18px; }
